@@ -4,7 +4,7 @@ Deep Q-Networks in Python
 
 In Conda environment, please replace `python3` as `python`.
 
-## 1. Linear Q-network
+## 1. Linear Q-Networks
 
 For CartPole-v0:
 
@@ -26,7 +26,7 @@ Training Episode: 3000 Iteration:  600000 Total Reward: -200.0
 Test Average Total Reward: -200.0±0.0
 ```
 
-## 2. Linear Q-network with Experience Replay
+## 2. Linear Q-Networks with Experience Replay
 
 For CartPole-v0:
 
@@ -48,7 +48,7 @@ Training Episode: 3000 Iteration:  600000 Total Reward: -200.0
 Test Average Total Reward: -200.0±0.0
 ```
 
-## 3. Deep Q-network
+## 3. Deep Q-Networks
 
 For CartPole-v0:
 
@@ -70,7 +70,7 @@ Training Episode: 1000 Iteration:  181383 Total Reward:  -89.0
 Test Average Total Reward: -133.8±30.5
 ```
 
-## 4. Dueling Deep Q-network
+## 4. Dueling Deep Q-Networks
 
 For CartPole-v0:
 
@@ -92,7 +92,7 @@ Training Episode: 3000 Iteration:  454477 Total Reward: -113.0
 Test Average Total Reward: -121.2±18.8
 ```
 
-## 5. Convolutional Deep Q-network
+## 5. Convolutional Deep Q-Networks
 
 For SpaceInvaders-v0:
 
