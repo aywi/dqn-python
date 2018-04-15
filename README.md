@@ -4,35 +4,7 @@ Deep Q-Networks in Python
 
 In Conda environment, please replace `python3` as `python`.
 
-## 1. Linear Q-Networks
-
-For CartPole-v0:
-
-```
-python3 ./dqn.py --network_type LQN --env CartPole-v0 --gamma 0.99 --train_episode 200
-```
-
-For MountainCar-v0:
-
-```
-python3 ./dqn.py --network_type LQN --env MountainCar-v0 --gamma 1 --train_episode 3000
-```
-
-## 2. Linear Q-Networks with Experience Replay
-
-For CartPole-v0:
-
-```
-python3 ./dqn.py --network_type Replay_LQN --env CartPole-v0 --gamma 0.99 --train_episode 500
-```
-
-For MountainCar-v0:
-
-```
-python3 ./dqn.py --network_type Replay_LQN --env MountainCar-v0 --gamma 1 --train_episode 3000
-```
-
-## 3. Deep Q-Networks
+## 1. Deep Q-Networks
 
 For CartPole-v0:
 
@@ -46,7 +18,7 @@ For MountainCar-v0:
 python3 ./dqn.py --network_type DQN --env MountainCar-v0 --gamma 1 --train_episode 1000
 ```
 
-## 4. Dueling Deep Q-Networks
+## 2. Dueling Deep Q-Networks
 
 For CartPole-v0:
 
@@ -60,7 +32,7 @@ For MountainCar-v0:
 python3 ./dqn.py --network_type Dueling_DQN --env MountainCar-v0 --gamma 1 --train_episode 3000
 ```
 
-## 5. Convolutional Deep Q-Networks
+## 3. Convolutional Deep Q-Networks
 
 For SpaceInvaders-v0:
 

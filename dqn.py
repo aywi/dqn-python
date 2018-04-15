@@ -31,10 +31,7 @@ class QNetwork(nn.Module):
         self.network_type = network_type
         self.n_state = n_state
         self.n_action = n_action
-        if self.network_type == 'LQN' or self.network_type == 'Replay_LQN':
-            self.fc = nn.Linear(self.n_state, self.n_action)
-            nn.init.xavier_uniform(self.fc.weight.data, gain=nn.init.calculate_gain('linear'))
-        elif self.network_type == 'DQN':
+        if self.network_type == 'DQN':
             self.fc1 = nn.Linear(self.n_state, 100)
             nn.init.xavier_uniform(self.fc1.weight.data, gain=nn.init.calculate_gain('relu'))
             self.fc2 = nn.Linear(100, 100)
@@ -71,9 +68,7 @@ class QNetwork(nn.Module):
             nn.init.xavier_uniform(self.fc2.weight.data, gain=nn.init.calculate_gain('linear'))
 
     def forward(self, x):
-        if self.network_type == 'LQN' or self.network_type == 'Replay_LQN':
-            x = self.fc(x)
-        elif self.network_type == 'DQN':
+        if self.network_type == 'DQN':
             x = F.relu(self.fc1(x))
             x = F.relu(self.fc2(x))
             x = F.relu(self.fc3(x))
@@ -291,16 +286,11 @@ class DQN():
                     f_s = f_s.cuda()
                 a = self.epsilon_greedy_policy(self.network.forward(f_s))
                 s_next, r, done, info = self.env.step(a)
-                if self.env_name == 'MountainCar-v0' and (
-                        self.network_type == 'LQN' or self.network_type == 'Replay_LQN') and s_next[0] < 0.5:
-                    done_train = False
-                else:
-                    done_train = done
                 if self.memory.memory_size > 0:
-                    self.memory.append(s, a, r, s_next, done_train)
+                    self.memory.append(s, a, r, s_next, done)
                     s_batch, a_batch, r_batch, s_next_batch, done_batch = self.memory.sample_batch(self.batch_size)
                 else:
-                    s_batch, a_batch, r_batch, s_next_batch, done_batch = s, [a], [r], s_next, [done_train]
+                    s_batch, a_batch, r_batch, s_next_batch, done_batch = s, [a], [r], s_next, [done]
                 if self.env_name == 'SpaceInvaders-v0':
                     s_batch = Variable(torch.FloatTensor(s_batch))
                     s_next_batch = Variable(torch.FloatTensor(s_next_batch))
@@ -423,13 +413,8 @@ class DQN():
                     f_s = f_s.cuda()
                 a = self.epsilon_greedy_policy(self.network.forward(f_s))
                 s_next, r, done, info = self.burn_in_env.step(a)
-                if self.env_name == 'MountainCar-v0' and (
-                        self.network_type == 'LQN' or self.network_type == 'Replay_LQN') and s_next[0] < 0.5:
-                    done_train = False
-                else:
-                    done_train = done
                 if self.memory.len < self.memory.burn_in:
-                    self.memory.append(s, a, r, s_next, done_train)
+                    self.memory.append(s, a, r, s_next, done)
                     if self.memory.len % 100 == 0:
                         print("burn_in: {:5d}".format(self.memory.len))
                 s = s_next
@@ -464,8 +449,6 @@ def parse_arguments():
 def main(args):
     tic = time.time()
     args = parse_arguments()
-    if args.network_type == 'LQN':
-        args.memory_size = 0
     agent = DQN(network_type=args.network_type, env_name=args.env, batch_size=args.batch_size, render=args.render,
                 video=args.video, gamma=args.gamma, lr=args.lr, weight_decay=args.weight_decay,
                 epsilon_start=args.epsilon_start, epsilon_end=args.epsilon_end,
