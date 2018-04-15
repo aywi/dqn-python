@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import argparse
+import errno
+import os
 import sys
 import time
 
@@ -190,7 +192,7 @@ class Replay_Memory():
         return full_s.reshape((1, self.n_state[0], self.n_state[1], self.n_state[2]))
 
 
-class DQN_Agent():
+class DQN():
     # In this class, we will implement functions to do the following.
     # (1) Create an instance of the Q Network class.
     # (2) Create a function that constructs a policy from the Q values predicted by the Q Network.
@@ -225,7 +227,10 @@ class DQN_Agent():
         self.n_action = self.env.action_space.n
         self.burn_in_env = gym.make(self.env_name)
         self.test_env = gym.make(self.env_name)
-        self.is_cuda = torch.cuda.is_available()
+        if self.network_type == 'Conv_DQN':
+            self.is_cuda = torch.cuda.is_available()
+        else:
+            self.is_cuda = False
         torch.manual_seed(0)
         if self.is_cuda:
             torch.cuda.manual_seed_all(0)
@@ -331,9 +336,17 @@ class DQN_Agent():
             if (episode + 1) % np.floor(train_episode / valid_interval) == 0:
                 total_r_mean, _ = self.test(valid_episode)
                 valid_total_r_mean.append([episode + 1, total_r_mean])
-        total_rs = list(zip([train_total_r, valid_total_r_mean], ["r-", "b-"], ["Training", "Evaluation (Average 20)"]))
-        self.plot_total_r(total_rs, train_episode, show=False, save=True,
-                          path="./" + self.network_type + "_" + self.env_name + "_Total_Rewards.pdf")
+                if episode + 1 > np.floor(train_episode / valid_interval):
+                    try:
+                        os.remove(reward_saved_path)
+                    except OSError as e:
+                        if e.errno != errno.ENOENT:
+                            print("Error: {:s} - {:s}".format(e.filename, e.strerror))
+                total_rs = list(
+                    zip([train_total_r, valid_total_r_mean], ["r-", "b-"], ["Training", "Evaluation (Average 20)"]))
+                reward_saved_path = "./" + self.network_type + "_" + self.env_name + "_Reward_" + str(
+                    episode + 1) + ".pdf"
+                self.plot_total_r(total_rs, train_episode, show=False, save=True, path=reward_saved_path)
 
     def video_callable(self, episode):
         return episode == 0 or (episode + 1) % np.floor(self.train_episode / self.video_interval) == 0
@@ -423,7 +436,7 @@ class DQN_Agent():
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Deep Q Network Argument Parser')
+    parser = argparse.ArgumentParser(description='Deep Q-Networks Argument Parser')
     parser.add_argument('--env', dest='env', type=str)
     parser.add_argument('--render', dest='render', type=int, default=0)
     parser.add_argument('--train', dest='train', type=int, default=1)
@@ -453,11 +466,11 @@ def main(args):
     args = parse_arguments()
     if args.network_type == 'LQN':
         args.memory_size = 0
-    agent = DQN_Agent(network_type=args.network_type, env_name=args.env, batch_size=args.batch_size, render=args.render,
-                      video=args.video, gamma=args.gamma, lr=args.lr, weight_decay=args.weight_decay,
-                      epsilon_start=args.epsilon_start, epsilon_end=args.epsilon_end,
-                      epsilon_decay_interval=args.epsilon_decay_interval, memory_size=args.memory_size,
-                      burn_in=args.burn_in, target_update_frequency=args.target_update_frequency)
+    agent = DQN(network_type=args.network_type, env_name=args.env, batch_size=args.batch_size, render=args.render,
+                video=args.video, gamma=args.gamma, lr=args.lr, weight_decay=args.weight_decay,
+                epsilon_start=args.epsilon_start, epsilon_end=args.epsilon_end,
+                epsilon_decay_interval=args.epsilon_decay_interval, memory_size=args.memory_size, burn_in=args.burn_in,
+                target_update_frequency=args.target_update_frequency)
     agent.train(args.train_episode, args.video_interval, args.valid_interval, args.valid_episode)
     agent.test(args.test_episode)
     print("Finished.")
